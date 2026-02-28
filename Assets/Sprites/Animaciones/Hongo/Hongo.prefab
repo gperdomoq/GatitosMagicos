@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7942890593743206394}
   - component: {fileID: 6780840488054553232}
-  - component: {fileID: 7032041805915724332}
   - component: {fileID: 2958817764857534857}
+  - component: {fileID: -7055117732627253003}
   m_Layer: 0
   m_Name: Hongo
   m_TagString: Untagged
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -4413027222828487815, guid: 1e580ca04332c504794a40ea78f87a7a, type: 3}
+  m_Sprite: {fileID: 2485792374464665343, guid: b36bfd7116d969445b4bcf0bba5d087b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -93,28 +93,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!95 &7032041805915724332
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6651085825501496609}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 3544e4359dc2f1745aff0db67dbaba93, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &2958817764857534857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,3 +108,25 @@ MonoBehaviour:
   ingredientName: Hongo
   icon: {fileID: -4413027222828487815, guid: 1e580ca04332c504794a40ea78f87a7a, type: 3}
   animator: {fileID: 0}
+--- !u!95 &-7055117732627253003
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6651085825501496609}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: fe35ecd3246362f4b9b1ec61b24f3781, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
