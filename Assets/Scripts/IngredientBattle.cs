@@ -4,10 +4,19 @@ using TMPro;
 
 public class IngredientBattle : MonoBehaviour
 {
+    [Header("Jugador")]
+    public int playerNumber = 1;
+
+    [Header("Ingredientes disponibles")]
+    public IngredientData[] ingredients;
+
     [Header("UI")]
     public TextMeshProUGUI patternDisplay;
     public TextMeshProUGUI timerDisplay;
     public TextMeshProUGUI scoreDisplay;
+
+    [Header("Animacion")]
+    public Animator ingredientAnimator;
 
     [Header("Configuracion")]
     public float timePerIngredient = 5f;
@@ -21,20 +30,13 @@ public class IngredientBattle : MonoBehaviour
 
     Key[] validKeys;
     string[] keyLabels;
-
+    IngredientData currentIngredient;
     int[] currentPattern = new int[4];
     int currentStep = 0;
     float ingredientTimer = 0f;
     float globalTimer = 0f;
-    int score = 0;
     bool battleActive = false;
     bool gameOver = false;
-
-    [Header("Jugador")]
-    public int playerNumber = 1;
-
-    [Header("Ingrediente actual")]
-    public string ingredientName = "Hierba";
 
     void OnEnable()
     {
@@ -46,15 +48,17 @@ public class IngredientBattle : MonoBehaviour
             rightKey.ToString()
         };
 
-        score = 0;
         globalTimer = totalTime;
         battleActive = true;
         gameOver = false;
-        GeneratePattern();
+        SpawnNextIngredient();
     }
 
-    void GeneratePattern()
+    void SpawnNextIngredient()
     {
+        currentIngredient = ingredients[Random.Range(0, ingredients.Length)];
+        SetupAnimator(currentIngredient);
+
         currentStep = 0;
         ingredientTimer = timePerIngredient;
 
@@ -62,6 +66,37 @@ public class IngredientBattle : MonoBehaviour
             currentPattern[i] = Random.Range(0, validKeys.Length);
 
         UpdatePatternDisplay();
+    }
+
+    void SetupAnimator(IngredientData data)
+    {
+        if (data.idleClip == null) return;
+
+        var controller = new UnityEditor.Animations.AnimatorController();
+        controller.AddLayer("Base");
+        var sm = controller.layers[0].stateMachine;
+
+        var idle = sm.AddState("Idle");
+        var win = sm.AddState("Win");
+        var lose = sm.AddState("Lose");
+
+        idle.motion = data.idleClip;
+        win.motion = data.winClip;
+        lose.motion = data.loseClip;
+
+        controller.AddParameter("win", AnimatorControllerParameterType.Trigger);
+        controller.AddParameter("lose", AnimatorControllerParameterType.Trigger);
+
+        var toWin = idle.AddTransition(win);
+        toWin.AddCondition(AnimatorConditionMode.If, 0, "win");
+        toWin.hasExitTime = false;
+
+        var toLose = idle.AddTransition(lose);
+        toLose.AddCondition(AnimatorConditionMode.If, 0, "lose");
+        toLose.hasExitTime = false;
+
+        ingredientAnimator.runtimeAnimatorController = controller;
+        ingredientAnimator.Play("Idle");
     }
 
     void UpdatePatternDisplay()
@@ -85,21 +120,19 @@ public class IngredientBattle : MonoBehaviour
 
         globalTimer -= Time.deltaTime;
         timerDisplay.text = $"Tiempo: {Mathf.CeilToInt(globalTimer)}";
-        scoreDisplay.text = $"Ingredientes: {score}";
 
         if (globalTimer <= 0f)
         {
             gameOver = true;
             patternDisplay.text = "¡Tiempo!";
-            Debug.Log($"Fin! Ingredientes: {score}");
+            ingredientAnimator.SetTrigger("win");
             return;
         }
 
         ingredientTimer -= Time.deltaTime;
         if (ingredientTimer <= 0f)
         {
-            Debug.Log("¡Tiempo agotado! Siguiente ingrediente.");
-            GeneratePattern();
+            OnPlayerFail();
             return;
         }
 
@@ -113,20 +146,34 @@ public class IngredientBattle : MonoBehaviour
                     UpdatePatternDisplay();
 
                     if (currentStep >= 4)
-                    {
-                        score++;
-                        GeneratePattern();
-                        GameManager.Instance.AddIngredient(playerNumber, ingredientName);
-                        Debug.Log($"¡Ingrediente ganado! Total: {score}");
-                    }
+                        OnPlayerWin();
                 }
                 else
                 {
-                    Debug.Log("¡Fallo! Siguiente ingrediente.");
-                    GeneratePattern();
+                    OnPlayerFail();
                 }
                 break;
             }
         }
+    }
+
+    void OnPlayerWin()
+    {
+        ingredientAnimator.SetTrigger("lose");
+        GameManager.Instance.AddIngredient(playerNumber, currentIngredient.ingredientName);
+        UpdateScoreDisplay();
+        Invoke(nameof(SpawnNextIngredient), 1f);
+    }
+
+    void OnPlayerFail()
+    {
+        ingredientAnimator.SetTrigger("win");
+        Invoke(nameof(SpawnNextIngredient), 1f);
+    }
+
+    void UpdateScoreDisplay()
+    {
+        var inv = GameManager.Instance.GetIngredients(playerNumber);
+        scoreDisplay.text = $"Ingredientes: {inv.Count}";
     }
 }
