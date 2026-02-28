@@ -21,7 +21,11 @@ public class StirringMinigame : MonoBehaviour
     [Header("Aciertos necesarios para ganar")]
     public int hitsRequired = 5;
 
+    [Header("Ingredientes procesados (mismo orden que en el selector)")]
+    public string[] processedIngredientNames;
+
     StationSwitcher stationSwitcher;
+    IngredientSelector ingredientSelector;
     SpriteRenderer targetLine;
     float currentX = 0f;
     float direction = 1f;
@@ -32,13 +36,14 @@ public class StirringMinigame : MonoBehaviour
     void Awake()
     {
         stationSwitcher = GetComponentInParent<StationSwitcher>();
+        ingredientSelector = GetComponentInParent<IngredientSelector>();
         CreateTargetLine();
     }
 
     void CreateTargetLine()
     {
         GameObject lineObj = new GameObject("TargetLine");
-        lineObj.transform.SetParent(movingBar.transform.parent); // mismo padre que movingBar
+        lineObj.transform.SetParent(movingBar.transform.parent);
         lineObj.transform.localScale = targetScale;
         lineObj.transform.localPosition = Vector3.zero;
 
@@ -82,18 +87,33 @@ public class StirringMinigame : MonoBehaviour
                 Debug.Log($"¡Acierto! {currentHits}/{hitsRequired}");
 
                 if (currentHits >= hitsRequired)
-                {
-                    completed = true;
-                    Debug.Log("¡Pocion revuelta!");
-                }
+                    CompleteMinigame();
                 else
-                {
                     PlaceNewTarget();
-                }
             }
             else
             {
                 Debug.Log("¡Fallaste!");
+            }
+        }
+    }
+
+    void CompleteMinigame()
+    {
+        completed = true;
+
+        string selected = ingredientSelector.SelectedIngredient;
+
+        for (int i = 0; i < ingredientSelector.validIngredients.Length; i++)
+        {
+            if (ingredientSelector.validIngredients[i] == selected)
+            {
+                if (i < processedIngredientNames.Length)
+                {
+                    GameManager.Instance.AddProcessedIngredient(stationSwitcher.playerNumber, processedIngredientNames[i]);
+                    Debug.Log($"¡Pocion revuelta! Se generó: {processedIngredientNames[i]}");
+                }
+                break;
             }
         }
     }

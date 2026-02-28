@@ -16,6 +16,9 @@ public class StationSwitcher : MonoBehaviour
     [Header("Start")]
     public int startIndex = 0;
 
+    [Header("Jugador")]
+public int playerNumber = 1;
+
     int currentIndex;
 
     public bool ActionPressed => Keyboard.current[actionKey].wasPressedThisFrame;

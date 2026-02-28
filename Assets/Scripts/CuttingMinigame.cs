@@ -12,7 +12,11 @@ public class CuttingMinigame : MonoBehaviour
     public float shakeDuration = 0.2f;
     public float shakeMagnitude = 0.1f;
 
+    [Header("Ingredientes procesados (mismo orden que en el selector)")]
+    public string[] processedIngredientNames;
+
     StationSwitcher stationSwitcher;
+    IngredientSelector ingredientSelector;
     int currentClicks = 0;
     bool completed = false;
     Vector3 originalPosition;
@@ -21,6 +25,7 @@ public class CuttingMinigame : MonoBehaviour
     void Awake()
     {
         stationSwitcher = GetComponentInParent<StationSwitcher>();
+        ingredientSelector = GetComponentInParent<IngredientSelector>();
     }
 
     void OnEnable()
@@ -45,10 +50,7 @@ public class CuttingMinigame : MonoBehaviour
             UpdateColor();
 
             if (currentClicks >= clicksRequired)
-            {
-                completed = true;
-                Debug.Log("¡Ingrediente cortado!");
-            }
+                CompleteMinigame();
         }
 
         if (shakeTimer > 0)
@@ -59,6 +61,26 @@ public class CuttingMinigame : MonoBehaviour
         else
         {
             targetSprite.transform.localPosition = originalPosition;
+        }
+    }
+
+    void CompleteMinigame()
+    {
+        completed = true;
+
+        string selected = ingredientSelector.SelectedIngredient;
+
+        for (int i = 0; i < ingredientSelector.validIngredients.Length; i++)
+        {
+            if (ingredientSelector.validIngredients[i] == selected)
+            {
+                if (i < processedIngredientNames.Length)
+                {
+                    GameManager.Instance.AddProcessedIngredient(stationSwitcher.playerNumber, processedIngredientNames[i]);
+                    Debug.Log($"¡Ingrediente cortado! Se generó: {processedIngredientNames[i]}");
+                }
+                break;
+            }
         }
     }
 
