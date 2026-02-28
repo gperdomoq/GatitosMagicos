@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class IngredientBattle : MonoBehaviour
 {
@@ -140,6 +141,7 @@ public class IngredientBattle : MonoBehaviour
             gameOver = true;
             patternDisplay.text = "¡Tiempo!";
             if (currentIngredient != null) currentIngredient.PlayWin();
+            Invoke(nameof(GoToCocina), 1f);
             return;
         }
 
@@ -194,5 +196,10 @@ public class IngredientBattle : MonoBehaviour
 
             ingredientCounts[i].text = $"x{count}";
         }
+    }
+
+    void GoToCocina()
+    {
+        SceneManager.LoadScene("Cocina");
     }
 }
