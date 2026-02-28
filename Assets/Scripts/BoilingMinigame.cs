@@ -18,6 +18,7 @@ public class BoilingMinigame : MonoBehaviour
     public float safeZone = 0.5f;
 
     StationSwitcher stationSwitcher;
+    int playerNumber;
     float currentX = 0f;
     float driftDirection = 1f;
     float timeInCenter = 0f;
@@ -26,6 +27,7 @@ public class BoilingMinigame : MonoBehaviour
     void Awake()
     {
         stationSwitcher = GetComponentInParent<StationSwitcher>();
+        playerNumber = stationSwitcher.playerNumber;
     }
 
     void OnEnable()
@@ -41,38 +43,24 @@ public class BoilingMinigame : MonoBehaviour
     {
         if (completed || indicator == null) return;
 
-        // Deriva sola hacia un lado
         currentX += driftDirection * driftSpeed * Time.deltaTime;
 
-        // Cambia de direccion aleatoriamente al llegar al borde
-        if (currentX >= maxX)
-        {
-            currentX = maxX;
-            PickNewDriftDirection();
-        }
-        else if (currentX <= minX)
-        {
-            currentX = minX;
-            PickNewDriftDirection();
-        }
+        if (currentX >= maxX) { currentX = maxX; PickNewDriftDirection(); }
+        else if (currentX <= minX) { currentX = minX; PickNewDriftDirection(); }
 
-        // Click empuja hacia el centro
         if (stationSwitcher.ActionPressed)
-        {
             currentX -= Mathf.Sign(currentX) * pushAmount;
-        }
 
         UpdatePosition();
         UpdateColor();
 
-        // Cuenta el tiempo que pasa centrado
         if (Mathf.Abs(currentX) <= safeZone)
         {
             timeInCenter += Time.deltaTime;
             if (timeInCenter >= timeRequired)
             {
                 completed = true;
-                Debug.Log("¡Pocion hervida!");
+                CompletePotion();
             }
         }
         else
@@ -81,9 +69,41 @@ public class BoilingMinigame : MonoBehaviour
         }
     }
 
+    void CompletePotion()
+    {
+        string detectedRecipe = DetectRecipe();
+
+        if (detectedRecipe != null && GameManager.Instance.CompleteRecipe(playerNumber, detectedRecipe))
+        {
+            OrderManager orderManager = GetComponentInParent<OrderManager>();
+            if (orderManager != null)
+                orderManager.TryCompleteOrder(detectedRecipe);
+            Debug.Log($"¡Pocion completada: {detectedRecipe}!");
+        }
+        else
+        {
+            Debug.Log("No coincide con ninguna receta o faltan ingredientes");
+        }
+    }
+
+    string DetectRecipe()
+    {
+        Debug.Log("=== Verificando recetas ===");
+        Debug.Log($"Originales P{playerNumber}: {string.Join(", ", GameManager.Instance.GetIngredients(playerNumber))}");
+        Debug.Log($"Procesados P{playerNumber}: {string.Join(", ", playerNumber == 1 ? GameManager.Instance.player1ProcessedIngredients : GameManager.Instance.player2ProcessedIngredients)}");
+
+        foreach (var recipe in GameManager.Recipes)
+        {
+            Debug.Log($"Verificando: {recipe.Key}");
+            bool can = GameManager.Instance.CanMakeRecipe(playerNumber, recipe.Key);
+            Debug.Log($"Puede hacer {recipe.Key}: {can}");
+            if (can) return recipe.Key;
+        }
+        return null;
+    }
+
     void PickNewDriftDirection()
     {
-        // Elige aleatoriamente izquierda o derecha pero tendiendo a alejarse del centro
         driftDirection = currentX >= 0 ? 1f : -1f;
         if (Random.value < 0.3f) driftDirection *= -1f;
     }

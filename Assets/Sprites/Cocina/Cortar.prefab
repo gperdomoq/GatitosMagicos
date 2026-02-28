@@ -444,6 +444,9 @@ MonoBehaviour:
   clicksRequired: 10
   shakeDuration: 0.2
   shakeMagnitude: 0.1
+  processedIngredientNames:
+  - Mangazo
+  - Fumon
 --- !u!1 &6120962650777721508
 GameObject:
   m_ObjectHideFlags: 0
