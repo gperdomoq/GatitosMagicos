@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3428274546958169715}
   - component: {fileID: 8319583748663238594}
   - component: {fileID: -7869256399791936901}
+  - component: {fileID: 8829754234849544554}
   m_Layer: 0
   m_Name: Circle
   m_TagString: Untagged
@@ -107,3 +108,25 @@ MonoBehaviour:
   ingredientName: Mnago
   icon: {fileID: -855298285791758126, guid: ee908c841b29a77419c3d6b0ae07c20a, type: 3}
   animator: {fileID: 8848241763175616187, guid: feeca7556a4633a449b69b5b25de181f, type: 3}
+--- !u!95 &8829754234849544554
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3820374822384731064}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9bfe20e3cec847e428e7791073319bd5, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
