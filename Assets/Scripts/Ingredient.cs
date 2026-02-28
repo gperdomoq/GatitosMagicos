@@ -6,7 +6,13 @@ public class Ingredient : MonoBehaviour
     public Sprite icon;
     public Animator animator;
 
-    public void PlayIdle() { if (animator != null) animator.Play("Idle"); }
-    public void PlayWin() { if (animator != null) animator.Play("Win"); }
-    public void PlayLose() { if (animator != null) animator.Play("Lose"); }
+    void Awake()
+    {
+        if (animator == null)
+            animator = GetComponent<Animator>();
+    }
+
+    public void PlayIdle() { if (animator != null) animator.Play("idle"); }
+    public void PlayWin() { if (animator != null) animator.Play("victory"); }
+    public void PlayLose() { if (animator != null) animator.Play("lose"); }
 }

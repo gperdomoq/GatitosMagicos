@@ -1,13 +1,22 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 using TMPro;
 
 public class IngredientBattle : MonoBehaviour
 {
+    [Header("Prefabs de ingredientes")]
+    public Ingredient[] ingredientPrefabs;
+
+    [Header("Punto de spawn")]
+    public Transform spawnPoint;
+
     [Header("UI")]
     public TextMeshProUGUI patternDisplay;
     public TextMeshProUGUI timerDisplay;
-    public TextMeshProUGUI scoreDisplay;
+
+    [Header("Inventario UI")]
+    public TextMeshProUGUI[] ingredientCounts;
 
     [Header("Configuracion")]
     public float timePerIngredient = 5f;
@@ -19,9 +28,13 @@ public class IngredientBattle : MonoBehaviour
     public Key leftKey = Key.A;
     public Key rightKey = Key.D;
 
+    [Header("Jugador")]
+    public int playerNumber = 1;
+
     Key[] validKeys;
     string[] keyLabels;
-
+    Ingredient currentIngredient;
+    GameObject currentIngredientObj;
     int[] currentPattern = new int[4];
     int currentStep = 0;
     float ingredientTimer = 0f;
@@ -29,14 +42,33 @@ public class IngredientBattle : MonoBehaviour
     int score = 0;
     bool battleActive = false;
     bool gameOver = false;
+    int[] ingredientOrder;
+    int orderIndex = 0;
 
-    [Header("Jugador")]
-    public int playerNumber = 1;
+    void ShuffleOrder()
+    {
+        ingredientOrder = new int[ingredientPrefabs.Length];
+        for (int i = 0; i < ingredientPrefabs.Length; i++)
+            ingredientOrder[i] = i;
 
-    [Header("Ingrediente actual")]
-    public string ingredientName = "Hierba";
+        for (int i = ingredientOrder.Length - 1; i > 0; i--)
+        {
+            int rand = Random.Range(0, i + 1);
+            int temp = ingredientOrder[i];
+            ingredientOrder[i] = ingredientOrder[rand];
+            ingredientOrder[rand] = temp;
+        }
 
+        orderIndex = 0;
+    }
 
+    Ingredient PickNextIngredient()
+    {
+        if (orderIndex >= ingredientOrder.Length)
+            ShuffleOrder();
+
+        return ingredientPrefabs[ingredientOrder[orderIndex++]];
+    }
 
     void OnEnable()
     {
@@ -52,11 +84,26 @@ public class IngredientBattle : MonoBehaviour
         globalTimer = totalTime;
         battleActive = true;
         gameOver = false;
-        GeneratePattern();
+        ShuffleOrder();
+        SpawnNextIngredient();
     }
 
-    void GeneratePattern()
+    void OnDisable()
     {
+        if (currentIngredientObj != null)
+            Destroy(currentIngredientObj);
+    }
+
+    void SpawnNextIngredient()
+    {
+        if (currentIngredientObj != null)
+            Destroy(currentIngredientObj);
+
+        Ingredient prefab = PickNextIngredient();
+        currentIngredientObj = Instantiate(prefab.gameObject, spawnPoint.position, Quaternion.identity, spawnPoint);
+        currentIngredient = currentIngredientObj.GetComponent<Ingredient>();
+        currentIngredient.PlayIdle();
+
         currentStep = 0;
         ingredientTimer = timePerIngredient;
 
@@ -87,21 +134,20 @@ public class IngredientBattle : MonoBehaviour
 
         globalTimer -= Time.deltaTime;
         timerDisplay.text = $"Tiempo: {Mathf.CeilToInt(globalTimer)}";
-        scoreDisplay.text = $"Ingredientes: {score}";
 
         if (globalTimer <= 0f)
         {
             gameOver = true;
             patternDisplay.text = "¡Tiempo!";
-            Debug.Log($"Fin! Ingredientes: {score}");
+            if (currentIngredient != null) currentIngredient.PlayWin();
             return;
         }
 
         ingredientTimer -= Time.deltaTime;
         if (ingredientTimer <= 0f)
         {
-            Debug.Log("¡Tiempo agotado! Siguiente ingrediente.");
-            GeneratePattern();
+            if (currentIngredient != null) currentIngredient.PlayWin();
+            SpawnNextIngredient();
             return;
         }
 
@@ -116,19 +162,37 @@ public class IngredientBattle : MonoBehaviour
 
                     if (currentStep >= 4)
                     {
+                        currentIngredient.PlayLose();
                         score++;
-                        GameManager.Instance.AddIngredient(playerNumber, ingredientName);
-                        Debug.Log($"¡Ingrediente ganado! Total: {score}");
-                        GeneratePattern();
+                        GameManager.Instance.AddIngredient(playerNumber, currentIngredient.ingredientName);
+                        UpdateInventoryUI();
+                        SpawnNextIngredient();
                     }
                 }
                 else
                 {
-                    Debug.Log("¡Fallo! Siguiente ingrediente.");
-                    GeneratePattern();
+                    if (currentIngredient != null) currentIngredient.PlayWin();
+                    SpawnNextIngredient();
                 }
                 break;
             }
+        }
+    }
+
+    void UpdateInventoryUI()
+    {
+        var inv = GameManager.Instance.GetIngredients(playerNumber);
+
+        for (int i = 0; i < ingredientPrefabs.Length; i++)
+        {
+            if (ingredientCounts[i] == null) continue;
+
+            string name = ingredientPrefabs[i].ingredientName;
+            int count = 0;
+            foreach (var item in inv)
+                if (item == name) count++;
+
+            ingredientCounts[i].text = $"x{count}";
         }
     }
 }
